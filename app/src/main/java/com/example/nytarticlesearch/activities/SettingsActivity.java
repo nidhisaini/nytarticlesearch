@@ -1,6 +1,7 @@
 package com.example.nytarticlesearch.activities;
 
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,9 +14,12 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.Toast;
 
 import com.example.nytarticlesearch.R;
+
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Calendar;
 
 /*Spinner
 *http://guides.codepath.com/android/Working-with-Input-Views#spinners
@@ -24,7 +28,7 @@ import com.example.nytarticlesearch.R;
 * escape sequence, \", on the interior quotes.
 * https://docs.oracle.com/javase/tutorial/java/data/characters.html
 * */
-public class SettingsActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
+public class SettingsActivity extends AppCompatActivity {
     Spinner spSortOrder;
     Button btnSave;
     ArrayAdapter<CharSequence> adapter;
@@ -34,19 +38,43 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
     CheckBox cbSports;
     EditText etBeginDate;
 
+
     CompoundButton.OnCheckedChangeListener checkListener;
     StringBuffer checkboxString = new StringBuffer() ;
+
+    int day_x;
+    int month_x;
+    int year_x;
+    static final int DIALOG_ID =0;
+    String beginDate;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-
         etBeginDate =(EditText) findViewById(R.id.etBeginDate);
         btnSave = (Button) findViewById(R.id.btnSave);
-        spSortOrder = (Spinner) findViewById(R.id.spSortOrder);
+
+        final Calendar cal = Calendar.getInstance();
+        year_x = cal.get(Calendar.YEAR);
+        month_x =cal.get(Calendar.MONTH);
+        day_x =cal.get(Calendar.DAY_OF_MONTH);
+
+
+
+        etBeginDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //showDialogOnEditButtonClick();
+                showDialog(DIALOG_ID);
+            }
+        });
+
 
         //code for adding the checkboxes
+
+        spSortOrder = (Spinner) findViewById(R.id.spSortOrder);
         cbArt = (CheckBox) findViewById(R.id.cbArt);
         cbArt.setChecked(false);
         cbArt.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -98,8 +126,7 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
         spSortOrder.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                itemSortOrder = adapter.getItem(position).toString();// .getItemAtPosition(position).toString();
-                //Toast.makeText(getApplicationContext(), itemSortOrder, Toast.LENGTH_LONG).show();
+                itemSortOrder = adapter.getItem(position).toString();
             }
 
             @Override
@@ -112,22 +139,55 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(getApplicationContext(), SearchActivity.class);
+                Intent i = new Intent(getApplicationContext(), SearchArticleActivity.class);
                 i.putExtra("sortOrder", itemSortOrder);
                 i.putExtra("checkboxValue", checkboxString.toString());
-                Toast.makeText(getApplicationContext(), checkboxString, Toast.LENGTH_LONG).show();
+                i.putExtra("beginDate", beginDate);
                 startActivity(i);
             }
         });
-
-
 
     }
 
 
     @Override
-    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-        String date = "You picked the following date: "+dayOfMonth+"/"+(monthOfYear+1)+"/"+year;
-        etBeginDate.setText(date);
+    protected Dialog onCreateDialog(int id){
+        if(id == DIALOG_ID)
+            return new DatePickerDialog(this, dpickerListner, year_x, month_x,day_x);
+        return null;
+
     }
-}
+
+    private DatePickerDialog.OnDateSetListener dpickerListner
+            = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            String month ="";
+            String day="";
+            year_x = year;
+            month_x = monthOfYear + 1;
+            day_x = dayOfMonth;
+
+            if(month_x <10){
+                NumberFormat f = new DecimalFormat("00");
+                month = (f.format(month_x));
+            }
+            else{
+                month = String.valueOf(month_x);
+            }
+            if(day_x <10){
+                NumberFormat f = new DecimalFormat("00");
+                day = (f.format(day_x));
+            }
+            else{
+                day = String.valueOf(day_x);
+            }
+            beginDate = String.valueOf(year_x + "" + month + "" + day);
+
+            etBeginDate.setText(beginDate);
+                    }
+    };
+
+
+
+    }

@@ -3,15 +3,16 @@ package com.example.nytarticlesearch.models;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcel;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * http://guides.codepath.com/android/Converting-JSON-to-Models
  * http://courses.codepath.com/course_videos/intro_to_android/youtube/-SivLLgpSZg?title=video+walkthrough
  */
-public class Article implements Serializable{
+@Parcel
+public class Article {
 
     String webUrl;
     String headline;
@@ -29,6 +30,8 @@ public class Article implements Serializable{
     public String getThumbNail() {
         return thumbNail;
     }
+
+    public Article(){}
 
     //constructor which will accept individual raw items into article objects
     public Article(JSONObject jsonObject) {
@@ -51,20 +54,18 @@ public class Article implements Serializable{
     }
 
     //Create factory method to parse entire list of articles
-    public static ArrayList<Article> fromJSONArray(JSONArray array){
+    public static ArrayList<Article> fromJSONArray(JSONArray array) {
         ArrayList<Article> results = new ArrayList<>();
 
-        for(int i =0 ; i < array.length(); i++){
-            try{
-                 results.add(new Article(array.getJSONObject(i)));
-            }
-            catch(JSONException e){
+        for (int i = 0; i < array.length(); i++) {
+            try {
+                results.add(new Article(array.getJSONObject(i)));
+            } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
         return results;
     }
-
 
 
 }

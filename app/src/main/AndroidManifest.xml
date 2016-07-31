@@ -3,6 +3,7 @@
     package="com.example.nytarticlesearch" >
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:allowBackup="true"
@@ -11,19 +12,25 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
         <activity android:name=".activities.SearchActivity" >
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
         <activity
             android:name=".activities.ArticleActivity"
-            android:label="@string/article_label">
+            android:label="@string/article_label" >
         </activity>
         <activity
             android:name=".activities.SettingsActivity"
-            android:label="@string/settings_lable">
+            android:label="@string/settings_lable" >
+        </activity>
+        <activity android:name=".activities.SearchArticleActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

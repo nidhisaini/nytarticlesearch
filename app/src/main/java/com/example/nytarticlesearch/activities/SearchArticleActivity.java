@@ -2,22 +2,22 @@ package com.example.nytarticlesearch.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
 import android.widget.Toast;
 
 import com.example.nytarticlesearch.R;
-import com.example.nytarticlesearch.activities.utils.EndlessScrollListener;
+import com.example.nytarticlesearch.activities.utils.EndlessRecyclerViewScrollListener;
 import com.example.nytarticlesearch.activities.utils.NetworkUtil;
-import com.example.nytarticlesearch.adapters.ArticleArrayAdapter;
+import com.example.nytarticlesearch.adapters.SearchArticleAdapter;
 import com.example.nytarticlesearch.models.Article;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -31,66 +31,53 @@ import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
 
+public class SearchArticleActivity extends AppCompatActivity {
 
-public class SearchActivity extends AppCompatActivity {
-
-
-    GridView gvResults;
-    ArrayList<Article> articles;
-    ArrayAdapter<Article> adapter;
     AsyncHttpClient client = new AsyncHttpClient();
     String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
+    ArrayList<Article> articles = new ArrayList<Article>();
+    RecyclerView rvArticles;
+    StaggeredGridLayoutManager staggeredGridLayoutManager;
+    SearchArticleAdapter adapter;
     String query;
     String checkboxValue;
     String selectedDate;
     String sortOrder;
     int page = 0;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_search);
+        setContentView(R.layout.activity_search_article);
         //check network connection
         if (NetworkUtil.getInstance(this).isNetworkAvailable()) {
             Toast.makeText(this, "Connected to Internet", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "Not connected to Internet", Toast.LENGTH_LONG).show();
         }
+
         setupViews();
+
     }
 
     private void setupViews() {
 
-        gvResults = (GridView) findViewById(R.id.gvResults);
-        articles = new ArrayList<>();
-        adapter = new ArticleArrayAdapter(SearchActivity.this, articles);
-        gvResults.setAdapter(adapter);
+        rvArticles = (RecyclerView) findViewById(R.id.rvArticles);
+        // First param is number of columns and second param is orientation i.e Vertical or Horizontal
+        staggeredGridLayoutManager =
+                new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL);
 
-        gvResults.setOnScrollListener(new EndlessScrollListener() {
+        rvArticles.setLayoutManager(staggeredGridLayoutManager);
+
+        adapter = new SearchArticleAdapter(this, articles);
+        rvArticles.setAdapter(adapter);
+
+        rvArticles.addOnScrollListener(new EndlessRecyclerViewScrollListener(staggeredGridLayoutManager) {
             @Override
-            public boolean onLoadMore(int page, int totalItemsCount) {
+            public void onLoadMore(int page, int totalItemsCount) {
                 customLoadMoreDataFromApi(page);
-                return true;
             }
         });
-
-
-        //listener for gridview item click
-        gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //create intent to display the article
-                Intent intent = new Intent(getApplicationContext(), ArticleActivity.class);
-                //get article to display
-                Article article = articles.get(position);
-                //pass in the article in the intent
-              //  intent.putExtra("article", article);
-                //launch the activity
-                startActivity(intent);
-            }
-        });
-
 
         sortOrder = getIntent().getStringExtra("sortOrder");
         checkboxValue = getIntent().getStringExtra("checkboxValue");
@@ -98,17 +85,66 @@ public class SearchActivity extends AppCompatActivity {
 
         if ((sortOrder != null) || (checkboxValue != null) || (selectedDate != null)) {
             onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
-        } /*else {
-            sortOrder = "Newest";
-            page = 0;
-            onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
-        }*/
+        }
+
+        adapter.setOnItemClickListener(new SearchArticleAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View itemView, int position) {
+                Article article = articles.get(position);
+                Intent intent = new Intent(getApplicationContext(), ArticleActivity.class);
+                intent.putExtra("article" , (Parcelable) article);
+                startActivity(intent);
+            }
+        });
     }
 
-    private void customLoadMoreDataFromApi(int page) {
-        page++;
-        onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
 
+
+
+    private void customLoadMoreDataFromApi(int page) {
+        onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
+        page++;
+    }
+
+
+    //ArticleSearch
+    private void onArticleSearch(String query) {
+        String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
+        RequestParams params = new RequestParams();
+        params.put("api-key", "707891098d8b435e864aca343d92a4ff");
+        params.put("page", 0);
+        params.put("q", query);
+
+        client.get(url, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                Log.d("DEBUG", response.toString());
+                JSONArray articleJsonResults = null;
+
+                try {
+                    /* bookAdapter.clear();
+                        // Load model objects into the adapter
+                        for (Book book : books) {
+                            bookAdapter.add(book); // add book through the adapter
+                        }
+                        bookAdapter.notifyDataSetChanged();*/
+                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    articles.clear();
+                    articles.addAll(Article.fromJSONArray(articleJsonResults));
+                    //adapter.notifyDataSetChanged();
+                    int size = adapter.getItemCount();
+                    adapter.notifyItemRangeInserted(size, Article.fromJSONArray(articleJsonResults).size());
+                    Log.d("DEBUG", articles.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                Toast.makeText(SearchArticleActivity.this, "FAIL", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     //Advance search
@@ -136,7 +172,9 @@ public class SearchActivity extends AppCompatActivity {
 
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
+                    int size = adapter.getItemCount();
+                    articles.addAll(Article.fromJSONArray(articleJsonResults));
+                    adapter.notifyItemRangeInserted(size, Article.fromJSONArray(articleJsonResults).size());
                     Log.d("DEBUG", articles.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -145,47 +183,14 @@ public class SearchActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(SearchActivity.this, "FAIL", Toast.LENGTH_LONG).show();
+                Toast.makeText(SearchArticleActivity.this, "FAIL", Toast.LENGTH_LONG).show();
             }
         });
 
-    }
-
-    //ArticleSearch
-    private void onArticleSearch(String query) {
-        String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
-        RequestParams params = new RequestParams();
-        params.put("api-key", "707891098d8b435e864aca343d92a4ff");
-        params.put("page", 0);
-        params.put("q", query);
-
-        client.get(url, params, new JsonHttpResponseHandler() {
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                Log.d("DEBUG", response.toString());
-                JSONArray articleJsonResults = null;
-
-                try {
-                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    adapter.clear();
-                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
-                    adapter.notifyDataSetChanged();
-                    Log.d("DEBUG", articles.toString());
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
-                Toast.makeText(SearchActivity.this, "FAIL", Toast.LENGTH_LONG).show();
-            }
-        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_search, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
@@ -215,32 +220,14 @@ public class SearchActivity extends AppCompatActivity {
                 showSettings();
                 return true;
             case R.id.settings:
-                showDialog();
-
+                //showDialog();
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void showDialog() {
-
-
-        /*FragmentManager fm = getSupportFragmentManager();
-        SettingsFragment SettingsFragment = com.example.nytarticlesearch.fragments.SettingsFragment.newInstance("Title");
-        SettingsFragment.show(fm, "fragment_edit_name");*/
-    }
-
     private void showSettings() {
-       /* Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        startActivity(intent);*/
-
-        Intent intent = new Intent(getApplicationContext(), SearchArticleActivity.class);
+        Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
         startActivity(intent);
     }
-
-   /* private void SearchArticleActivity(){
-        Intent intent = new Intent(getApplicationContext(),  Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
-        startActivity(intent);
-    }*/
-
 }
