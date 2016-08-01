@@ -10,6 +10,11 @@
     android:background="@color/primary_light">
 
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="40dp"
+        android:layout_gravity="center">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -20,7 +25,8 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_alignRight="@+id/tvNewsDeskValue"
-        android:layout_alignEnd="@+id/tvNewsDeskValue" />
+        android:layout_alignEnd="@+id/tvNewsDeskValue"
+        android:layout_gravity="center" />
 
     <Spinner
         android:layout_width="wrap_content"
@@ -29,17 +35,21 @@
         android:spinnerMode="dropdown"
         android:entries="@array/sortorder_array"
         android:prompt="@string/sortorder_prompt"
-        android:layout_below="@+id/tvSortOrder"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/tvSortOrder"
+        android:layout_toEndOf="@+id/tvSortOrder"
+        android:layout_gravity="center" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/btnSave"
         android:id="@+id/btnSave"
-        android:layout_below="@+id/tvBeginDate"
-        android:layout_centerHorizontal="true" />
+        android:background="@color/colorPrimaryDark"
+        android:layout_below="@+id/etEndDate"
+        android:layout_alignRight="@+id/cbSports"
+        android:layout_alignEnd="@+id/cbSports"
+        android:layout_gravity="center" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -49,7 +59,8 @@
         android:id="@+id/tvNewsDeskValue"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/spSortOrder" />
+        android:layout_below="@+id/spSortOrder"
+        android:layout_gravity="center" />
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -59,7 +70,8 @@
         android:checked="false"
         android:layout_below="@+id/spSortOrder"
         android:layout_toRightOf="@+id/tvNewsDeskValue"
-        android:layout_toEndOf="@+id/tvNewsDeskValue" />
+        android:layout_toEndOf="@+id/tvNewsDeskValue"
+        android:layout_gravity="center" />
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -69,7 +81,8 @@
         android:layout_below="@+id/cbArt"
         android:layout_alignLeft="@+id/cbArt"
         android:layout_alignStart="@+id/cbArt"
-        android:checked="false" />
+        android:checked="false"
+        android:layout_gravity="center" />
 
     <CheckBox
         android:layout_width="wrap_content"
@@ -79,7 +92,8 @@
         android:layout_below="@+id/cbFashionStyle"
         android:layout_alignLeft="@+id/cbFashionStyle"
         android:layout_alignStart="@+id/cbFashionStyle"
-        android:checked="false" />
+        android:checked="false"
+        android:layout_gravity="center" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -92,7 +106,7 @@
         android:text="@string/tvBeginDate"
         android:layout_toLeftOf="@+id/cbSports"
         android:layout_toStartOf="@+id/cbSports"
-        android:layout_alignBottom="@+id/etBeginDate" />
+        android:layout_gravity="center" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -103,6 +117,34 @@
         android:layout_below="@+id/cbSports"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
-        android:text="@string/etBeginDate" />
+        android:text="@string/etBeginDate"
+        android:layout_gravity="center" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/textView"
+            android:text="@string/tvEndDate"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_below="@+id/tvBeginDate"
+            android:layout_toLeftOf="@+id/etBeginDate"
+            android:layout_toStartOf="@+id/etBeginDate"
+            android:layout_gravity="center" />
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:ems="10"
+            android:id="@+id/etEndDate"
+            android:text=""
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/tvBeginDate"
+            android:layout_toEndOf="@+id/tvBeginDate"
+            android:layout_gravity="center" />
+
+    </RelativeLayout>
 
 </RelativeLayout>

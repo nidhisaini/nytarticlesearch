@@ -101,7 +101,7 @@ public class SearchActivity extends AppCompatActivity {
         } /*else {
             sortOrder = "Newest";
             page = 0;
-            onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
+            onAdvnaceSearch(sortOrder, checkboxValue, beginDate, page);
         }*/
     }
 
@@ -214,8 +214,6 @@ public class SearchActivity extends AppCompatActivity {
             case R.id.miSettings:
                 showSettings();
                 return true;
-            case R.id.settings:
-                showDialog();
 
             default:
                 return super.onOptionsItemSelected(item);

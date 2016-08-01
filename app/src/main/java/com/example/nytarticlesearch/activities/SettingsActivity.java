@@ -37,6 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
     CheckBox cbFashionStyle;
     CheckBox cbSports;
     EditText etBeginDate;
+    EditText etEndDate;
 
 
     CompoundButton.OnCheckedChangeListener checkListener;
@@ -45,14 +46,17 @@ public class SettingsActivity extends AppCompatActivity {
     int day_x;
     int month_x;
     int year_x;
-    static final int DIALOG_ID =0;
+    static final int DIALOG_BEGIN_DATEID = 0;
+    static final int DIALOG_END_DATE_ID = 1;
     String beginDate;
+    String endDate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        etEndDate = (EditText) findViewById(R.id.etEndDate);
         etBeginDate =(EditText) findViewById(R.id.etBeginDate);
         btnSave = (Button) findViewById(R.id.btnSave);
 
@@ -67,7 +71,14 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //showDialogOnEditButtonClick();
-                showDialog(DIALOG_ID);
+                showDialog(DIALOG_BEGIN_DATEID);
+            }
+        });
+
+        etEndDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialog(DIALOG_END_DATE_ID);
             }
         });
 
@@ -143,6 +154,7 @@ public class SettingsActivity extends AppCompatActivity {
                 i.putExtra("sortOrder", itemSortOrder);
                 i.putExtra("checkboxValue", checkboxString.toString());
                 i.putExtra("beginDate", beginDate);
+                i.putExtra("endDate", endDate);
                 startActivity(i);
             }
         });
@@ -152,8 +164,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected Dialog onCreateDialog(int id){
-        if(id == DIALOG_ID)
+        if(id == DIALOG_BEGIN_DATEID)
             return new DatePickerDialog(this, dpickerListner, year_x, month_x,day_x);
+        if(id == DIALOG_END_DATE_ID)
+            return new DatePickerDialog(this, dpickerEndListner, year_x, month_x,day_x);
         return null;
 
     }
@@ -189,5 +203,36 @@ public class SettingsActivity extends AppCompatActivity {
     };
 
 
+    private DatePickerDialog.OnDateSetListener dpickerEndListner
+            = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
+            String month ="";
+            String day="";
+            year_x = year;
+            month_x = monthOfYear + 1;
+            day_x = dayOfMonth;
 
-    }
+            if(month_x <10){
+                NumberFormat f = new DecimalFormat("00");
+                month = (f.format(month_x));
+            }
+            else{
+                month = String.valueOf(month_x);
+            }
+            if(day_x <10){
+                NumberFormat f = new DecimalFormat("00");
+                day = (f.format(day_x));
+            }
+            else{
+                day = String.valueOf(day_x);
+            }
+            endDate = String.valueOf(year_x + "" + month + "" + day);
+
+            etEndDate.setText(endDate);
+        }
+    };
+
+
+
+}

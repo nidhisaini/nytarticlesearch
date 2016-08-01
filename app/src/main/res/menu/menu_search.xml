@@ -6,11 +6,7 @@
         app:showAsAction="never"
         android:title="@string/settings_title">
     </item>
-    <item
-        android:id="@+id/settings"
-        app:showAsAction="never"
-        android:title="set">
-    </item>
+
     <item android:id="@+id/action_search"
         android:orderInCategory="5"
         android:title="Search"

@@ -28,19 +28,19 @@ public class ArticleActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_article);
 
-        article = (Article)getIntent().getParcelableExtra("article");
-        url = article.getWebUrl();
+        url = getIntent().getStringExtra("article");//.getParcelableExtra("article");
         webView = (WebView) findViewById(R.id.wvArticle);
 
-        webView.setWebViewClient(new WebViewClient(){
+        webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 view.loadUrl(url);
                 return true;
             }
         });
-        webView.loadUrl(article.getWebUrl());
-
+        //webView.loadUrl(article.getWebUrl());
+        webView.loadUrl(url);
+       // url = article.getWebUrl();
 
     }
 
@@ -58,7 +58,8 @@ public class ArticleActivity extends AppCompatActivity {
 
         // get reference to WebView
         webView = (WebView) findViewById(R.id.wvArticle);
-        article = (Article)getIntent().getSerializableExtra("article");
+        url = getIntent().getStringExtra("article");
+        //article = (Article)getIntent().getSerializableExtra("article");
         //WebView wvArticle = (WebView) findViewById(R.id.wvArticle);
 
 

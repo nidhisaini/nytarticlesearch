@@ -2,7 +2,6 @@ package com.example.nytarticlesearch.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
@@ -41,7 +40,8 @@ public class SearchArticleActivity extends AppCompatActivity {
     SearchArticleAdapter adapter;
     String query;
     String checkboxValue;
-    String selectedDate;
+    String beginDate;
+    String endDate;
     String sortOrder;
     int page = 0;
 
@@ -81,10 +81,11 @@ public class SearchArticleActivity extends AppCompatActivity {
 
         sortOrder = getIntent().getStringExtra("sortOrder");
         checkboxValue = getIntent().getStringExtra("checkboxValue");
-        selectedDate = getIntent().getStringExtra("beginDate");
+        beginDate = getIntent().getStringExtra("beginDate");
+        endDate = getIntent().getStringExtra("endDate");
 
-        if ((sortOrder != null) || (checkboxValue != null) || (selectedDate != null)) {
-            onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
+        if ((sortOrder != null) || (checkboxValue != null) || (beginDate != null) || (endDate != null)) {
+            onAdvnaceSearch(sortOrder, checkboxValue, beginDate, page, endDate);
         }
 
         adapter.setOnItemClickListener(new SearchArticleAdapter.OnItemClickListener() {
@@ -92,8 +93,9 @@ public class SearchArticleActivity extends AppCompatActivity {
             public void onItemClick(View itemView, int position) {
                 Article article = articles.get(position);
                 Intent intent = new Intent(getApplicationContext(), ArticleActivity.class);
-                intent.putExtra("article" , (Parcelable) article);
+                intent.putExtra("article", article.getWebUrl());
                 startActivity(intent);
+
             }
         });
     }
@@ -102,7 +104,7 @@ public class SearchArticleActivity extends AppCompatActivity {
 
 
     private void customLoadMoreDataFromApi(int page) {
-        onAdvnaceSearch(sortOrder, checkboxValue, selectedDate, page);
+        onAdvnaceSearch(sortOrder, checkboxValue, beginDate, page, endDate);
         page++;
     }
 
@@ -122,12 +124,6 @@ public class SearchArticleActivity extends AppCompatActivity {
                 JSONArray articleJsonResults = null;
 
                 try {
-                    /* bookAdapter.clear();
-                        // Load model objects into the adapter
-                        for (Book book : books) {
-                            bookAdapter.add(book); // add book through the adapter
-                        }
-                        bookAdapter.notifyDataSetChanged();*/
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
                     articles.clear();
                     articles.addAll(Article.fromJSONArray(articleJsonResults));
@@ -148,7 +144,7 @@ public class SearchArticleActivity extends AppCompatActivity {
     }
 
     //Advance search
-    private void onAdvnaceSearch(String sortOrder, String checkboxValue, String selectedDate, int page) {
+    private void onAdvnaceSearch(String sortOrder, String checkboxValue, String beginDate, int page, String endDate) {
         RequestParams params = new RequestParams();
         params.put("api-key", "707891098d8b435e864aca343d92a4ff");
         params.put("page", page);
@@ -160,8 +156,11 @@ public class SearchArticleActivity extends AppCompatActivity {
         if (checkboxValue != null && !checkboxValue.isEmpty() && !checkboxValue.equals("null")) {
             params.put("fq", "news_desk:(" + checkboxValue + ")");
         }
-        if (selectedDate != null && !selectedDate.isEmpty() && !selectedDate.equals("null")) {
-            params.put("begin_date", selectedDate);
+        if (beginDate != null && !beginDate.isEmpty() && !beginDate.equals("null")) {
+            params.put("begin_date", beginDate);
+        }
+        if (endDate != null && !endDate.isEmpty() && !endDate.equals("null")) {
+            params.put("end_date", endDate);
         }
 
         client.get(url, params, new JsonHttpResponseHandler() {
@@ -206,6 +205,7 @@ public class SearchArticleActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
+               articles.clear();
                 return false;
             }
         });
@@ -219,8 +219,6 @@ public class SearchArticleActivity extends AppCompatActivity {
             case R.id.miSettings:
                 showSettings();
                 return true;
-            case R.id.settings:
-                //showDialog();
             default:
                 return super.onOptionsItemSelected(item);
         }

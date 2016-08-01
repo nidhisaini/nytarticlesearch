@@ -16,5 +16,7 @@
     <string name="cbFashionStyle"><![CDATA[Fashion & Style]]></string>
     <string name="cbSports">Sports</string>
     <string name="etBeginDate" />
+    <string name="tvEndDate">End Date</string>
+    <string name="etEndDate">End Date</string>
 
 </resources>
